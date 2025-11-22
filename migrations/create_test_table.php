@@ -9,8 +9,8 @@ class create_test_table extends Migration {
                 ->text('name')
                 ->text('surname')
                 ->boolean('enabled')
-                ->timestamp('created')
-                ->timestamp('updated');
+                ->timestamp('created', false, true)
+                ->timestamp('updated', false, true);
     }
 
 }
