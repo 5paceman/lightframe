@@ -2,7 +2,7 @@
 
 function view(string $template, array $data = [])
 {
-    $file = __DIR__.'/../pages/'.$template.".php";
+    $file = __DIR__.'/../views/'.$template.".php";
 
     if(!file_exists($file)) {
         throw new Exception("Template not found: $file");
@@ -11,7 +11,13 @@ function view(string $template, array $data = [])
     extract($data);
     ob_start();
     include $file;
-    return ob_get_clean();
+    echo ob_get_clean();
+}
+
+function json($data)
+{
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode($data);
 }
 
 ?>

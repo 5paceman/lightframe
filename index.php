@@ -5,7 +5,7 @@ session_start();
 require "app/Config.php";
 require "app/Router.php";
 require "app/database/Database.php";
-require "app/Page.php";
+require "app/Response.php";
 
 
 $router = new Router();

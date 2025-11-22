@@ -1,7 +1,12 @@
 <?php
 
 $router->get('/', function () {
-    echo view('test');
+    view('test');
+}, []);
+
+$router->get('/json-test', function () {
+    $results = DB::get()->query()->table('test')->select()->get();
+    json($results);
 }, []);
 
 ?>
