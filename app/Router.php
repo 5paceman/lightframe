@@ -43,6 +43,9 @@ class Router
         }
 
         http_response_code(404);
-        echo "404 Not Found";
+        if(Config::error_4xx_view === '')
+            echo "404 Not Found";
+        else
+            view(Config::error_4xx_view);
     }
 }

@@ -17,6 +17,8 @@ class Config {
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
         ]
     ];
+
+    public const error_4xx_view = '';
 }
 
 ?>
