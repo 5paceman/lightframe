@@ -4,7 +4,7 @@ session_start();
 
 require "app/Config.php";
 require "app/Router.php";
-require "app/Database.php";
+require "app/database/Database.php";
 require "app/Page.php";
 
 
