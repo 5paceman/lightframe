@@ -1,6 +1,8 @@
 <?php
 
-class create_test_table extends Migration {
+use App\Database\Migration;
+
+class create_users_table extends Migration {
 
     public function migrate()
     {

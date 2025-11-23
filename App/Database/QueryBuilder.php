@@ -1,8 +1,10 @@
 <?php
 
+namespace App\Database;
+
 class QueryBuilder {
 
-    protected PDO $pdo;
+    protected \PDO $pdo;
     protected String $table;
 
     protected array $select = ['*'];
@@ -14,7 +16,7 @@ class QueryBuilder {
     protected ?string $orderBy = null;
     protected ?string $limit = null;
 
-    public function __construct(PDO $pdo) {
+    public function __construct(\PDO $pdo) {
         $this->pdo = $pdo;
     }
 
@@ -74,7 +76,7 @@ class QueryBuilder {
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($this->bindings);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     public function first(): ?array

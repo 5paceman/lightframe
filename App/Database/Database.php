@@ -1,12 +1,15 @@
 <?php
 
-require 'QueryBuilder.php';
+namespace App\Database;
 
-class DB {
+use App\Config;
+use App\PDOTYPE;
+
+class Database {
     
-    protected ?PDO $pdo = null;
+    protected ?\PDO $pdo = null;
 
-    protected static ?DB $_instance = null;
+    protected static ?Database $_instance = null;
 
     public function __construct() {}
 
@@ -14,7 +17,7 @@ class DB {
     {
         if(self::$_instance === null)
         {
-            self::$_instance = new DB();
+            self::$_instance = new Database();
         }
 
         return self::$_instance;
@@ -24,7 +27,7 @@ class DB {
     {
         if(!isset(Config::database['db'], Config::database['host'], Config::database['port'], Config::database['username'], Config::database['password'], Config::database['pdo']))
         {
-            throw new Exception(message: "Config undefined for database");
+            throw new \Exception(message: "Config undefined for database");
         }
         
         switch(Config::database['pdo'])
@@ -36,11 +39,11 @@ class DB {
                 $dsn = "pgsql:";
                 break;
             default:
-                throw new Exception("Unsupported driver");
+                throw new \Exception("Unsupported driver");
         }
         
         $dsn .= "host=".Config::database['host'].";port=".Config::database['port'].";dbname=".Config::database['db'];
-        $this->pdo = new PDO($dsn, Config::database['username'], Config::database['password'], Config::database['options']);
+        $this->pdo = new \PDO($dsn, Config::database['username'], Config::database['password'], Config::database['options']);
         return $this->pdo;
     }
 

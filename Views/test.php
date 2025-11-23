@@ -1,12 +1,14 @@
 <?php
 
-DB::get()->query()->table('test')->insert([
+use App\Database\Database;
+
+Database::get()->query()->table('test')->insert([
     'name' => 'username',
     'surname' => 'surname',
     'enabled' => rand(0, 1) ? 'true' : 'false'
 ]);
 
-$results = DB::get()->query()->table('test')->select()->get();
+$results = Database::get()->query()->table('test')->select()->get();
 
 ?>
 

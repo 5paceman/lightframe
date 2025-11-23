@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Database;
+
 abstract class Model {
     protected string $table;
     protected string $primaryKey = 'id';
@@ -20,7 +22,7 @@ abstract class Model {
     }
 
     protected static function query(): QueryBuilder {
-        $pdo = DB::get()->connect();
+        $pdo = Database::get()->connect();
         return (new QueryBuilder($pdo))->table((new static)->table);
     }
 
@@ -54,7 +56,7 @@ abstract class Model {
         // Insert
         $result = $qb->insert($this->attributes);
         if ($result) {
-            $this->attributes[$this->primaryKey] = DB::get()->connect()->lastInsertId();
+            $this->attributes[$this->primaryKey] = Database::get()->connect()->lastInsertId();
         }
         return $result;
     }

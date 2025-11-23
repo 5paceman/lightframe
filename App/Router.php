@@ -1,5 +1,7 @@
 <?php
 
+namespace App;
+
 class Router
 {
     protected array $routes = [];
@@ -46,6 +48,6 @@ class Router
         if(Config::error_4xx_view === '')
             echo "404 Not Found";
         else
-            view(Config::error_4xx_view);
+            Response::view(Config::error_4xx_view);
     }
 }

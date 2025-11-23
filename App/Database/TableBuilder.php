@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Database;
+
 class ColumnDefinition
 {
     public string $name;
@@ -84,7 +86,7 @@ class IndexDefinition
 
 class TableBuilder
 {
-    protected PDO $pdo;
+    protected \PDO $pdo;
     protected string $driver;
     protected string $table;
 
@@ -94,10 +96,10 @@ class TableBuilder
     /** @var IndexDefinition[] */
     protected array $indexes = [];
 
-    public function __construct(PDO $pdo)
+    public function __construct(\PDO $pdo)
     {
         $this->pdo = $pdo;
-        $this->driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        $this->driver = $pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
     }
 
     public function name(string $table): static
@@ -211,7 +213,7 @@ class TableBuilder
         return $col;
     }
 
-    public function foreignId(string $name): ColumnDefinition
+    public function foreignId(string $name): IndexDefinition
     {
         $col = new ColumnDefinition($name, $this->mapType('bigint'));
         $col->unsigned();
@@ -220,10 +222,10 @@ class TableBuilder
         $index = new IndexDefinition('foreign', [$name]);
         $this->indexes[] = $index;
 
-        return $col;
+        return $index;
     }
 
-    public function timestamp(string $name, $default = '')
+    public function timestamp(string $name, $default = null)
     {
         $created = new ColumnDefinition($name, 'TIMESTAMP');
         $created->nullable(true);
@@ -330,12 +332,14 @@ class TableBuilder
 
         return match ($index->type) {
             'primary' => "PRIMARY KEY ($cols)",
-            'unique' => "UNIQUE ($cols)",
-            'index' => "INDEX ($cols)",
-            'foreign' => 
-                "FOREIGN KEY ($cols) REFERENCES "
-                . $this->wrap($index->foreignTable) . 
-                " (" . $this->wrap($index->foreignColumn) . ")",
+            'unique'  => "UNIQUE ($cols)",
+            'index'   => $this->driver === 'mysql' ? "INDEX ($cols)" : throw new \RuntimeException("PostgreSQL regular index handled separately"),
+            'foreign' => $index->foreignTable && $index->foreignColumn
+                ? "FOREIGN KEY ($cols) REFERENCES "
+                . $this->wrap($index->foreignTable)
+                . " (" . $this->wrap($index->foreignColumn) . ")"
+                : throw new \RuntimeException("Foreign key requires both table and column"),
+            default   => throw new \RuntimeException("Unknown index type: {$index->type}")
         };
     }
 
@@ -345,11 +349,21 @@ class TableBuilder
 
     public function create(): bool
     {
+        // Compile columns
         $columnSql = array_map(fn($c) => $this->compileColumn($c), $this->columns);
-        $indexSql  = array_map(fn($i) => $this->compileIndex($i), $this->indexes);
 
-        $sql = "CREATE TABLE {$this->wrap($this->table)} (\n" .
-            implode(",\n", array_merge($columnSql, $indexSql)) . "\n)";
+        // Compile only constraints allowed inside CREATE TABLE (PK, UNIQUE, FK)
+        $tableIndexes = array_filter(array_map(function ($i) {
+            if ($i->type === 'index' && $this->driver === 'pgsql') {
+                // Skip regular indexes in PostgreSQL here
+                return null;
+            }
+            return $this->compileIndex($i);
+        }, $this->indexes));
+
+        $sql = "CREATE TABLE {$this->wrap($this->table)} (\n"
+            . implode(",\n", array_merge($columnSql, $tableIndexes))
+            . "\n)";
 
         if ($this->driver === 'mysql') {
             $sql .= " ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
@@ -357,6 +371,20 @@ class TableBuilder
             $sql .= ";";
         }
 
-        return $this->pdo->exec($sql) !== false;
+        $result = $this->pdo->exec($sql) !== false;
+
+        // Create regular indexes separately for PostgreSQL
+        if ($this->driver === 'pgsql') {
+            foreach ($this->indexes as $index) {
+                if ($index->type === 'index') {
+                    $indexName = $this->wrap($this->table . '_' . implode('_', $index->columns) . '_idx');
+                    $cols = implode(", ", array_map(fn($c) => $this->wrap($c), $index->columns));
+                    $sql = "CREATE INDEX $indexName ON {$this->wrap($this->table)} ($cols);";
+                    $this->pdo->exec($sql);
+                }
+            }
+        }
+
+        return $result;
     }
 }

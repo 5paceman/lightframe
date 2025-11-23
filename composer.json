@@ -1,0 +1,16 @@
+{
+    "name": "lightframe/app",
+    "description": "Simple lightweight PHP framework",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "App\\": "App/"
+        }
+    },
+    "authors": [
+        {
+            "name": "saereya"
+        }
+    ],
+    "require": {}
+}
