@@ -105,7 +105,7 @@ class TableBuilder
         $this->table = $table;
         return $this;
     }
-
+    
     // --------------------------------------------------------------
     // Column Type Maps (MySQL ↔ PostgreSQL)
     // --------------------------------------------------------------
@@ -223,6 +223,42 @@ class TableBuilder
         return $col;
     }
 
+    public function timestamp(string $name, $default = '')
+    {
+        $created = new ColumnDefinition($name, 'TIMESTAMP');
+        $created->nullable(true);
+        $created->default($default);
+        $this->addColumn($created);
+        return $created;
+    }
+
+    public function timestamps(): static
+    {
+        // created_at column
+        $created = new ColumnDefinition('created_at', 'TIMESTAMP');
+        $created->nullable(true);
+        $created->default('CURRENT_TIMESTAMP');
+        $this->addColumn($created);
+
+        // updated_at column
+        $updated = new ColumnDefinition('updated_at', 'TIMESTAMP');
+        $updated->nullable(true);
+
+        if ($this->driver === 'mysql') {
+            // MySQL supports explicit ON UPDATE
+            $updated->default('CURRENT_TIMESTAMP');
+            $updated->extra('ON UPDATE CURRENT_TIMESTAMP');
+        } else {
+            // PostgreSQL: use default only
+            // (trigger-based auto-update can be added if desired)
+            $updated->default('CURRENT_TIMESTAMP');
+        }
+
+        $this->addColumn($updated);
+
+        return $this;
+    }
+
     // --------------------------------------------------------------
     // Index / Constraints
     // --------------------------------------------------------------
@@ -269,10 +305,16 @@ class TableBuilder
         $sql .= $col->nullable ? " NULL" : " NOT NULL";
 
         if ($col->default !== null) {
-            $value = is_numeric($col->default)
-                ? $col->default
-                : $this->pdo->quote($col->default);
-            $sql .= " DEFAULT $value";
+            if (in_array($col->default, ['CURRENT_TIMESTAMP'])) {
+                // SQL expression — do not quote
+                $sql .= " DEFAULT {$col->default}";
+            } else {
+                $value = is_numeric($col->default)
+                    ? $col->default
+                    : $this->pdo->quote($col->default);
+
+                $sql .= " DEFAULT $value";
+            }
         }
 
         if ($col->extra) {
