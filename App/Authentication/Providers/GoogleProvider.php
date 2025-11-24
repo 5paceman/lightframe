@@ -16,22 +16,20 @@ class GoogleProvider implements OAuthProvider{
         $this->provider = new Google([
             'clientId' => Config::authentication['providers']['google']['clientId'],
             'clientSecret' => Config::authentication['providers']['google']['clientSecret'],
-            'redirectUri' => Config::authentication['providers']['google']['redirectUri'],
-            'hostedDomain' => Config::domain,
+            'redirectUri' => Config::domain.Config::authentication['providers']['redirect_path']
         ]);
     }
 
     public function getAuthUrl(): string
     {
+        $url = $this->provider->getAuthorizationUrl();
         $_SESSION['oauth2state'] = $this->provider->getState();
-        return $this->provider->getAuthorizationUrl();
+        $_SESSION['oauthProvider'] = 'google';
+        return $url;
     }
 
     public function getUserData(string $authCode): array
     {
-        if(empty($_GET['state']) || ($_GET['state'] !== $_SESSION['oauth2state']))
-            throw new Exception("Invalid state.");
-        
         $accessToken = $this->provider->getAccessToken('authorization_code', [
             'code' => $authCode
         ]);

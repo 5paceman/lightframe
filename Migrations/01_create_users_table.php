@@ -9,7 +9,7 @@ class create_users_table extends Migration {
         $this->table->name('users');
         $this->table->increments('id');
         $this->table->text('email');
-        $this->table->text('password');
+        $this->table->text('password')->nullable();
         $this->table->timestamp('last_login');
         $this->table->timestamps();
     }

@@ -10,7 +10,6 @@ class Authenticate {
 
     protected static function createLoginSession($userId)
     {
-        session_regenerate_id(true);
         $session_id = bin2hex(random_bytes(32));
         $result = Database::get()->query()->table('sessions')->insert([
             'session_id' => $session_id,
@@ -22,7 +21,8 @@ class Authenticate {
             throw new \Exception("Unable to create login session");
         }
 
-        $_SESSION['session_id'] = $session_id;
+        $_SESSION['auth_session'] = $session_id;
+        session_regenerate_id();
     }
 
     public static function login(string $email, string $password)
@@ -33,7 +33,7 @@ class Authenticate {
             throw new \Exception("User doesnt exist");
         }
         $user = new User($data);
-        if(!password_verify($password, $user->password))
+        if($user->password === null || !password_verify($password, $user->password))
         {
             throw new \Exception("Password invalid.");
         }
@@ -79,7 +79,6 @@ class Authenticate {
                 if(!$linkResult)
                     throw new Exception("Unable to link session");
 
-                $user['id'] = 
             }
 
             self::createLoginSession($user['id']);
@@ -104,9 +103,9 @@ class Authenticate {
 
     public static function logout()
     {
-        if(isset($_SESSION['session_id']))
+        if(isset($_SESSION['auth_session']))
         {
-            Database::get()->query()->table('sessions')->where('session_id', '=', $_SESSION['session_id'])->delete();
+            Database::get()->query()->table('sessions')->where('session_id', '=', $_SESSION['auth_session'])->delete();
         }
 
         session_destroy();
@@ -114,7 +113,7 @@ class Authenticate {
 
     public static function authed(): bool
     {
-        return isset($_SESSION['session_id']) && Database::get()->query()->table('sessions')->where('session_id', '=', $_SESSION['session_id'])->first();
+        return isset($_SESSION['auth_session']) && Database::get()->query()->table('sessions')->where('session_id', '=', $_SESSION['auth_session'])->first();
     }
 }
 

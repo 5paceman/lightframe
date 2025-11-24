@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\Authentication\Providers\GoogleProvider;
+
 enum PDOTYPE {
     case MYSQL;
     case POSTGRES;
@@ -9,7 +11,7 @@ enum PDOTYPE {
 
 class Config {
 
-    public const domain = 'localhost';
+    public const domain = 'http://localhost:8000';
 
     public const database = [
         'db' => 'lightframe',
@@ -33,10 +35,11 @@ class Config {
             'samesite' => 'Strict'
         ],
         'providers' => [
+            'redirect_path' => '/oauth-callback',
             'google' => [
+                'provider_class' => GoogleProvider::class,
                 'clientId' => '',
-                'clientSecret' => '',
-                'redirectUri' => ''
+                'clientSecret' => ''
             ]
         ]
     ];

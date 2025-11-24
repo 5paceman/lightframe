@@ -345,7 +345,7 @@ class TableBuilder
 
     public function drop(): bool
     {
-        $sql = "DROP TABLE {$this->table};";
+        $sql = "DROP TABLE IF EXISTS {$this->table};";
         return $this->pdo->exec($sql) !== false;
     }
 
