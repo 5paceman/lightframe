@@ -31,6 +31,13 @@ class Config {
             'secure' => false,
             'httponly' => true,
             'samesite' => 'Strict'
+        ],
+        'providers' => [
+            'google' => [
+                'clientId' => '',
+                'clientSecret' => '',
+                'redirectUri' => ''
+            ]
         ]
     ];
 

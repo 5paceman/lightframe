@@ -2,7 +2,9 @@
 
 namespace App\Database;
 
-abstract class Model {
+use ArrayAccess;
+
+abstract class Model implements ArrayAccess{
     protected string $table;
     protected string $primaryKey = 'id';
     protected array $attributes = [];
@@ -13,12 +15,28 @@ abstract class Model {
         }
     }
 
+    public function offsetExists($offset): bool {
+        return isset($this->attributes[$offset]);
+    }
+
+    public function offsetGet($offset): mixed {
+        return $this->attributes[$offset] ?? null;
+    }
+
     public function __get($name) {
         return $this->attributes[$name] ?? null;
     }
 
     public function __set($name, $value) {
         $this->attributes[$name] = $value;
+    }
+
+    public function offsetSet($offset, $value): void {
+        $this->attributes[$offset] = $value;
+    }
+
+    public function offsetUnset($offset): void {
+        unset($this->attributes[$offset]);
     }
 
     protected static function query(): QueryBuilder {
@@ -41,6 +59,15 @@ abstract class Model {
     // Where helper for chaining
     public static function where(string $column, string $operator, $value): QueryBuilder {
         return static::query()->where($column, $operator, $value);
+    }
+
+    public static function create(array $data)
+    {
+        $qb = static::query();
+        if($qb->insert($data))
+            return static::find($qb->lastInsertId());
+        else
+            return false;
     }
 
     // Save (insert or update)
@@ -68,6 +95,7 @@ abstract class Model {
             ->where($this->primaryKey, '=', $this->attributes[$this->primaryKey])
             ->update([$this->primaryKey => null]); // Or implement actual delete method in QueryBuilder
     }
+
 }
 
 ?>

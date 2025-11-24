@@ -2,6 +2,7 @@
 
 namespace App\Authentication;
 
+use App\Authentication\Providers\OAuthProvider;
 use App\Config;
 use App\Database\Database;
 use App\Response;
@@ -29,6 +30,12 @@ function user()
 {
     $session = Database::get()->query()->table('sessions')->where('session_id', '=', $_SESSION['session_id'])->first();
     return User::find($session['user_id']);
+}
+
+function redirectToAuthProvider(OAuthProvider $provider)
+{
+    header("Location: {$provider->getAuthUrl()}");
+    exit;
 }
 
 ?>
