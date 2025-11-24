@@ -39,9 +39,8 @@ abstract class Model {
     }
 
     // Where helper for chaining
-    public static function where(string $column, string $operator, $value): ?static {
-        $data = static::query()->where($column, $operator, $value)->first();
-        return $data ? new static($data) : null;
+    public static function where(string $column, string $operator, $value): QueryBuilder {
+        return static::query()->where($column, $operator, $value);
     }
 
     // Save (insert or update)

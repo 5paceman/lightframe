@@ -3,18 +3,17 @@
 namespace App\Authentication;
 
 use App\Database\Database;
-use App\Response;
 use Models\User;
 
 class Authenticate {
     public static function login($email, $password)
     {
-        $user = User::where('email', '=', $email);
-        if(!$user)
+        $data = User::where('email', '=', $email)->first();
+        if(!$data)
         {
             throw new \Exception("User doesnt exist");
         }
-
+        $user = new User($data);
         if(!password_verify($password, $user->password))
         {
             throw new \Exception("Password invalid.");

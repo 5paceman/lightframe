@@ -10,13 +10,15 @@ $router->get('/', function () {
 
 $router->post('/login', function() {
     Authenticate::login($_POST['email'], $_POST['password']);
+    Response::redirect('/');
 });
 
 $router->post('/register', function() {
     Authenticate::register($_POST['email'], $_POST['password']);
+    Response::redirect('/');
 });
 
-$router->post('/logout', function() {
+$router->get('/logout', function() {
     Authenticate::logout();
     Response::redirect('/');
 });

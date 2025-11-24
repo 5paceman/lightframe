@@ -8,7 +8,7 @@ use App\Response;
 use Models\User;
 
 /**
- * Middleware function for checking if the user is authentication and if not redirect to the configured login page
+ * Middleware function for checking if the user is authenticated and if not redirect to the configured login page
  * @see Config::authentication[login_path]
  * @return void
  */
