@@ -3,12 +3,13 @@
 namespace App\Authentication;
 
 use App\Database\Database;
-use \Models\User;
+use App\Response;
+use Models\User;
 
 class Authenticate {
     public static function login($email, $password)
     {
-        $user = User::where('email', '=', $email)->first();
+        $user = User::where('email', '=', $email);
         if(!$user)
         {
             throw new \Exception("User doesnt exist");
@@ -21,10 +22,15 @@ class Authenticate {
 
         session_regenerate_id(true);
         $session_id = bin2hex(random_bytes(32));
-        Database::get()->query()->table('sessions')->insert([
+        $result = Database::get()->query()->table('sessions')->insert([
             'session_id' => $session_id,
             'user_id' => $user->id
         ]);
+
+        if(!$result)
+        {
+            throw new \Exception("Unable to create login session");
+        }
 
         $_SESSION['session_id'] = $session_id;
     }
@@ -37,10 +43,27 @@ class Authenticate {
             throw new \Exception("User already exists");
         }
 
-        $user = new User([
+        $result = new User([
             'email' => $email,
-            'password' => password_hash($password)
+            'password' => password_hash($password, PASSWORD_DEFAULT)
         ])->save();
+
+        return $result;
+    }
+
+    public static function logout()
+    {
+        if(isset($_SESSION['session_id']))
+        {
+            Database::get()->query()->table('sessions')->where('session_id', '=', $_SESSION['session_id'])->delete();
+        }
+
+        session_destroy();
+    }
+
+    public static function authed(): bool
+    {
+        return isset($_SESSION['session_id']) && Database::get()->query()->table('sessions')->where('session_id', '=', $_SESSION['session_id'])->first();
     }
 }
 

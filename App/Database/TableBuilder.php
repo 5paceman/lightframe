@@ -343,6 +343,12 @@ class TableBuilder
         };
     }
 
+    public function drop(): bool
+    {
+        $sql = "DROP TABLE {$this->table};";
+        return $this->pdo->exec($sql) !== false;
+    }
+
     // --------------------------------------------------------------
     // Create Table
     // --------------------------------------------------------------

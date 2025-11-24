@@ -20,6 +20,11 @@ class QueryBuilder {
         $this->pdo = $pdo;
     }
 
+    public function lastInsertId(): string|bool
+    {
+        return $this->pdo->lastInsertId();
+    }
+
     public function table($name)
     {
         $this->table = $name;
@@ -99,6 +104,24 @@ class QueryBuilder {
 
         return $stmt->execute($data);
     }
+
+    public function delete(): bool
+    {
+        $sql = "DELETE FROM {$this->table}";
+
+        if ($this->wheres) {
+            $sql .= " WHERE " . implode(" AND ", $this->wheres);
+        }
+
+        if ($this->limit) {
+            $sql .= " LIMIT {$this->limit}";
+        }
+
+        $stmt = $this->pdo->prepare($sql);
+
+        return $stmt->execute($this->bindings);
+    }
+
 
     public function update(array $data): bool
     {

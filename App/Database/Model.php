@@ -39,8 +39,9 @@ abstract class Model {
     }
 
     // Where helper for chaining
-    public static function where(string $column, string $operator, $value): QueryBuilder {
-        return static::query()->where($column, $operator, $value);
+    public static function where(string $column, string $operator, $value): ?static {
+        $data = static::query()->where($column, $operator, $value)->first();
+        return $data ? new static($data) : null;
     }
 
     // Save (insert or update)
@@ -56,7 +57,7 @@ abstract class Model {
         // Insert
         $result = $qb->insert($this->attributes);
         if ($result) {
-            $this->attributes[$this->primaryKey] = Database::get()->connect()->lastInsertId();
+            $this->attributes[$this->primaryKey] = $qb->lastInsertId();
         }
         return $result;
     }

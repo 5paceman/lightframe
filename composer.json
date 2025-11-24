@@ -4,8 +4,13 @@
     "type": "library",
     "autoload": {
         "psr-4": {
-            "App\\": "App/"
-        }
+            "App\\": "App/",
+            "Models\\": "Models/",
+            "Controllers\\": "Controllers/"
+        },
+        "files": [
+            "App/Authentication/Auth_Helpers.php"
+        ]
     },
     "authors": [
         {
