@@ -11,7 +11,7 @@ enum PDOTYPE {
 
 class Config {
 
-    public const domain = 'http://localhost:8000';
+    public const host = 'http://localhost:8000';
 
     public const database = [
         'db' => 'lightframe',

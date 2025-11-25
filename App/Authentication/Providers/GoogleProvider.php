@@ -16,7 +16,7 @@ class GoogleProvider implements OAuthProvider{
         $this->provider = new Google([
             'clientId' => Config::authentication['providers']['google']['clientId'],
             'clientSecret' => Config::authentication['providers']['google']['clientSecret'],
-            'redirectUri' => Config::domain.Config::authentication['providers']['redirect_path']
+            'redirectUri' => Config::host.Config::authentication['providers']['redirect_path']
         ]);
     }
 

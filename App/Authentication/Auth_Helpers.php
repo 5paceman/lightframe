@@ -19,7 +19,7 @@ function authenticated()
     if(Authenticate::authed())
         return;
 
-    $_SESSION['session_id'] = null;
+    $_SESSION['auth_session'] = null;
     Response::redirect(Config::authentication['login_path']);
 }
 
@@ -29,8 +29,7 @@ function authenticated()
  */
 function user()
 {
-    $session = Database::get()->query()->table('sessions')->where('session_id', '=', $_SESSION['auth_session'])->first();
-    return User::find($session['user_id']);
+    return User::find($_SESSION['user_id']);
 }
 
 function redirectToAuthProvider(OAuthProvider $provider)

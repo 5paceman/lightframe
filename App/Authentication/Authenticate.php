@@ -22,6 +22,7 @@ class Authenticate {
         }
 
         $_SESSION['auth_session'] = $session_id;
+        $_SESSION['user_id'] = $userId;
         session_regenerate_id();
     }
 

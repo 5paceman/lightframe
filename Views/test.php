@@ -33,9 +33,5 @@ use function App\Authentication\user;
             <input type="password" name="password">
             <input type="submit" value="Register">
         </form>
-
-        <?php
-            var_dump(User::all());
-        ?>
     </body>
 </html>
